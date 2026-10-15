@@ -955,9 +955,23 @@ $("#music-toggle").addEventListener("click", async () => {
       button.setAttribute("aria-pressed", "true");
       $("#music-label").textContent = "MUSIC ON";
     } catch (error) {
-      console.error("음악 재생 실패:", error);
-      $("#music-label").textContent = "FILE CHECK";
-      alert("음악 파일을 확인해 주세요: files/ishigaki-bgm.mp3");
+      console.error("음악 재생 실패:", {
+        name: error.name,
+        message: error.message,
+        src: audio.currentSrc,
+        readyState: audio.readyState,
+        networkState: audio.networkState,
+      });
+    
+      button.setAttribute("aria-pressed", "false");
+      $("#music-label").textContent = "PLAY ERROR";
+    
+      alert(
+        `음악 재생 실패\n` +
+        `오류 유형: ${error.name}\n` +
+        `상세 내용: ${error.message || "상세 정보 없음"}\n` +
+        `파일 주소: ${audio.currentSrc}`
+      );
     }
   } else {
     audio.pause();
