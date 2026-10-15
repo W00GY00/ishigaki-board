@@ -209,5 +209,20 @@
   </dialog>
 
   <audio id="bgm" src="./files/ishigaki-bgm.mp3" loop preload="none"></audio>
+  
+  <!-- 사진 원본 보기 -->
+  <div id="photo-lightbox" class="photo-lightbox" aria-hidden="true">
+    <button type="button" id="lightbox-close" class="lightbox-close" aria-label="사진 닫기">×</button>
+  
+    <button type="button" id="lightbox-prev" class="lightbox-nav lightbox-prev" aria-label="이전 사진">‹</button>
+  
+    <div class="lightbox-content">
+      <img id="lightbox-image" src="" alt="원본 사진" />
+      <div id="lightbox-counter" class="lightbox-counter"></div>
+    </div>
+  
+    <button type="button" id="lightbox-next" class="lightbox-nav lightbox-next" aria-label="다음 사진">›</button>
+  </div>
+
 </body>
 </html>
