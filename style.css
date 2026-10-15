@@ -528,3 +528,130 @@ textarea::placeholder, input::placeholder { color: #a1b1af; }
     transition-duration: 0.01ms !important;
   }
 }
+
+/* 홈 화면의 실제 게시글 목록 */
+.home-posts-panel {
+  margin-top: 20px;
+}
+
+.home-posts-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.home-posts-heading h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.1rem;
+}
+
+.home-posts-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.home-post-card {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+
+.home-post-card h4 {
+  margin: 10px 0 8px;
+  color: var(--ink);
+  font-size: 1.05rem;
+}
+
+.home-post-card p {
+  margin: 0;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.home-post-card .post-content {
+  white-space: pre-wrap;
+}
+
+.home-post-card .post-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* 게시글 제목 입력란 */
+#post-title {
+  width: 100%;
+  margin: 8px 0 18px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+
+#post-title:focus {
+  outline: 2px solid var(--sea);
+  outline-offset: 2px;
+}
+
+.photo-help {
+  margin: 8px 0 12px;
+  font-size: 0.85rem;
+}
+
+/* 게시글 사진 */
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.photo-grid:empty {
+  display: none;
+}
+
+.photo-grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 12px;
+  background: var(--sea-light);
+}
+
+.post-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.post-photo-grid img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: 12px;
+  background: var(--sea-light);
+}
+
+@media (max-width: 480px) {
+  .photo-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .home-posts-heading {
+    align-items: flex-start;
+  }
+}
