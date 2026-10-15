@@ -645,7 +645,7 @@ function createPostCard(post, photos, nicknames, isHome = false) {
     const removeButton = makeElement(
       "button",
       "secondary-button",
-      "내 게시글 삭제"
+      isAdmin ? "게시글 삭제" : "내 게시글 삭제"
     );
     removeButton.type = "button";
     removeButton.style.marginTop = "15px";
@@ -658,7 +658,7 @@ function createPostCard(post, photos, nicknames, isHome = false) {
 
 // 홈과 게시판에 게시글 표시
 async function loadPosts() {
-  if (!isMember) return;
+  if (!isMember && !isAdmin) return;
 
   const boardList = $("#posts-list");
   const homeList = $("#home-posts-list");
