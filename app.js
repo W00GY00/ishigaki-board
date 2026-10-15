@@ -47,7 +47,7 @@ function setBusy(button, busy, busyText = "처리 중...") {
 function showPage(pageName) {
   if (!pages[pageName]) return;
 
-  if (pageName !== "home" && !isMember) {
+  if (pageName !== "home" && !isMember && !isAdmin) {
     if (!$("#invite-dialog").open) {
       $("#invite-dialog").showModal();
     }
@@ -151,7 +151,24 @@ async function checkAdmin() {
 // 참가 인증 기록 확인
 
  // 참가 인증 기록 확인
+
 async function checkMembership() {
+  // 관리자 여부를 먼저 확인해 참가자 인증과 분리
+  await checkAdmin();
+
+  if (isAdmin) {
+    setMessage($("#profile-status"), "관리자 로그인 완료");
+    setMessage($("#invite-message"), "");
+    $("#logout-button").hidden = false;
+
+    if ($("#invite-dialog").open) {
+      $("#invite-dialog").close();
+    }
+
+    await loadPosts();
+    return;
+  }
+
   const { data, error } = await supabase
     .from("trip_members")
     .select("user_id")
@@ -160,6 +177,7 @@ async function checkMembership() {
 
   if (error) {
     console.error("참가자 확인 오류:", error);
+
     setMessage(
       $("#invite-message"),
       "참가 여부를 확인할 수 없어요. trip_members 정책을 확인해 주세요.",
@@ -177,8 +195,8 @@ async function checkMembership() {
   if (isMember) {
     setMessage($("#profile-status"), "여행 참가 인증 완료");
     setMessage($("#invite-message"), "");
+    $("#logout-button").hidden = true;
 
-    await checkAdmin();
     await loadProfile();
     await loadPosts();
 
@@ -187,6 +205,7 @@ async function checkMembership() {
     }
   } else {
     setMessage($("#profile-status"), "참가 인증이 필요해요.");
+    $("#logout-button").hidden = true;
 
     if (!$("#invite-dialog").open) {
       $("#invite-dialog").showModal();
@@ -261,6 +280,121 @@ $("#invite-form").addEventListener("submit", async (event) => {
     );
   } finally {
     isBusy = false;
+    setBusy(button, false);
+  }
+});
+
+/* 관리자 이메일/비밀번호 로그인 */
+$("#admin-login-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const email = $("#admin-email").value.trim();
+  const password = $("#admin-password").value;
+  const button = $("#admin-login-submit");
+
+  setBusy(button, true, "로그인 중...");
+  setMessage($("#admin-login-message"), "");
+
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+
+    currentUser = data.user;
+    isMember = false;
+
+    await checkAdmin();
+
+    if (!isAdmin) {
+      await supabase.auth.signOut();
+
+      const { data: anonymousData, error: anonymousError } =
+        await supabase.auth.signInAnonymously();
+
+      if (anonymousError) throw anonymousError;
+
+      currentUser = anonymousData.user;
+      isAdmin = false;
+
+      throw new Error(
+        "이 계정에는 관리자 권한이 없어요. 관리자 계정을 확인해 주세요."
+      );
+    }
+
+    $("#admin-password").value = "";
+    $("#logout-button").hidden = false;
+
+    setMessage($("#profile-status"), "관리자 로그인 완료");
+    setMessage($("#admin-login-message"), "관리자 로그인에 성공했어요.");
+
+    if ($("#invite-dialog").open) {
+      $("#invite-dialog").close();
+    }
+
+    await loadPosts();
+    showPage("home");
+  } catch (error) {
+    console.error("관리자 로그인 오류:", error);
+
+    setMessage(
+      $("#admin-login-message"),
+      error.message ||
+        "로그인에 실패했어요. 이메일과 비밀번호를 확인해 주세요.",
+      true
+    );
+  } finally {
+    setBusy(button, false);
+  }
+});
+
+/* 로그아웃 */
+$("#logout-button").addEventListener("click", async () => {
+  const button = $("#logout-button");
+
+  if (button.disabled) return;
+
+  setBusy(button, true, "로그아웃 중...");
+
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+
+    currentUser = null;
+    isMember = false;
+    isAdmin = false;
+    currentNickname = "여행자";
+
+    const { data, error: anonymousError } =
+      await supabase.auth.signInAnonymously();
+
+    if (anonymousError) throw anonymousError;
+
+    currentUser = data.user;
+
+    setMessage($("#logout-message"), "로그아웃했어요.");
+    setMessage($("#admin-login-message"), "");
+    setMessage($("#invite-message"), "");
+
+    $("#admin-email").value = "";
+    $("#admin-password").value = "";
+
+    await checkMembership();
+
+    if (!$("#invite-dialog").open) {
+      $("#invite-dialog").showModal();
+    }
+  } catch (error) {
+    console.error("로그아웃 오류:", error);
+
+    setMessage(
+      $("#logout-message"),
+      "로그아웃 처리에 실패했어요. 페이지를 새로고침한 뒤 다시 확인해 주세요.",
+      true
+    );
+  } finally {
     setBusy(button, false);
   }
 });
