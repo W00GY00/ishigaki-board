@@ -1,0 +1,199 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#eaf8f5" />
+  <meta name="description" content="2026 이시가키 여행 기록과 함께하는 여행 게시판" />
+  <title>Ishigaki | 2026.10.16–19</title>
+  <link rel="stylesheet" href="./style.css" />
+  <script type="module" src="./app.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#home" aria-label="Ishigaki 홈">
+        <span class="brand-mark">I</span>
+        <span>ISHIGAKI<span class="brand-sub">TRAVEL JOURNAL</span></span>
+      </a>
+      <button id="music-toggle" class="icon-button" type="button"
+        aria-label="배경음악 재생 또는 일시정지" aria-pressed="false">
+        ♪ <span id="music-label">MUSIC OFF</span>
+      </button>
+    </header>
+
+    <main>
+      <section id="home-page" class="page active" aria-labelledby="hero-title">
+        <div class="hero">
+          <div class="hero-content">
+            <p class="eyebrow">OUR LITTLE ISLAND ESCAPE</p>
+            <h1 id="hero-title">Ishigaki<span>Island</span></h1>
+            <p class="hero-date">2026.10.16 — 10.19</p>
+            <p class="hero-description">
+              에메랄드빛 바다와 함께하는<br />
+              우리만의 작은 여행 기록.
+            </p>
+            <button class="primary-button" type="button" data-go="board">
+              여행 기록 보러 가기 <span>↗</span>
+            </button>
+          </div>
+          <div class="hero-art" aria-hidden="true">
+            <div class="sun"></div>
+            <div class="island island-back"></div>
+            <div class="island island-front"></div>
+            <div class="sea sea-one"></div>
+            <div class="sea sea-two"></div>
+            <div class="sea sea-three"></div>
+            <span class="hero-stamp">OKINAWA<br />JAPAN</span>
+          </div>
+        </div>
+
+        <section class="section-block">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">THE JOURNEY</p>
+              <h2>여행의 순간들</h2>
+            </div>
+            <span class="muted">OCT 16 — 19</span>
+          </div>
+
+          <div class="info-grid">
+            <article class="info-card">
+              <span class="card-icon">☼</span>
+              <p class="card-kicker">DAY 01 · OCT 16</p>
+              <h3>여행의 시작</h3>
+              <p>이시가키에 도착해<br />섬의 첫 풍경 만나기</p>
+            </article>
+            <article class="info-card">
+              <span class="card-icon">≈</span>
+              <p class="card-kicker">DAY 02 · OCT 17</p>
+              <h3>바다와 섬</h3>
+              <p>푸른 바다와<br />여유로운 섬 여행</p>
+            </article>
+            <article class="info-card">
+              <span class="card-icon">✳</span>
+              <p class="card-kicker">DAY 03 · OCT 18</p>
+              <h3>우리의 기록</h3>
+              <p>사진과 이야기로<br />하루를 남기기</p>
+            </article>
+            <article class="info-card">
+              <span class="card-icon">⌁</span>
+              <p class="card-kicker">DAY 04 · OCT 19</p>
+              <h3>다음 여행을</h3>
+              <p>아쉬움을 담아<br />여행 마무리하기</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="quote-card">
+          <span class="quote-mark">“</span>
+          <p>Somewhere between the sea<br />and our memories.</p>
+          <span class="muted">A LITTLE MEMORY OF ISHIGAKI</span>
+        </section>
+      </section>
+
+      <section id="board-page" class="page" aria-labelledby="board-title" hidden>
+        <div class="page-heading">
+          <p class="eyebrow">TRAVEL COMMUNITY</p>
+          <h1 id="board-title">여행 게시판<span class="heading-dot">.</span></h1>
+          <p>우리의 여행 소식과 순간을 함께 나눠요.</p>
+        </div>
+
+        <section id="board-area" class="board-area">
+          <div class="board-toolbar">
+            <span id="post-count" class="muted">게시글을 불러오는 중...</span>
+            <button id="refresh-posts" class="secondary-button" type="button">
+              새로고침 ↻
+            </button>
+          </div>
+
+          <form id="post-form" class="post-form">
+            <label for="post-content">새로운 여행 기록</label>
+            <textarea id="post-content" maxlength="3000" rows="4"
+              placeholder="오늘의 여행 이야기나 공유하고 싶은 정보를 적어 주세요."
+              required></textarea>
+            <div class="form-footer">
+              <span class="muted">최대 3,000자</span>
+              <button class="primary-button" type="submit">게시글 등록 ↗</button>
+            </div>
+          </form>
+
+          <p id="board-message" class="message" role="status" aria-live="polite"></p>
+          <div id="posts-list" class="posts-list">
+            <div class="empty-state">게시글을 불러오고 있어요...</div>
+          </div>
+        </section>
+      </section>
+
+      <section id="profile-page" class="page" aria-labelledby="profile-title" hidden>
+        <div class="page-heading">
+          <p class="eyebrow">YOUR TRAVEL SPACE</p>
+          <h1 id="profile-title">내 정보<span class="heading-dot">.</span></h1>
+          <p>우리의 여행에서 사용할 닉네임을 설정해 주세요.</p>
+        </div>
+
+        <section class="profile-card">
+          <div class="avatar" aria-hidden="true">✳</div>
+          <p class="eyebrow">TRAVEL MATE</p>
+          <h2 id="profile-display-name">여행자</h2>
+          <p id="profile-status" class="muted">인증 상태를 확인하고 있어요.</p>
+
+          <form id="profile-form">
+            <label for="nickname">여행 닉네임</label>
+            <input id="nickname" type="text" minlength="1" maxlength="30"
+              placeholder="예: 바다를걷는사람" required />
+            <button class="primary-button full-button" type="submit">
+              닉네임 저장
+            </button>
+          </form>
+
+          <div class="profile-note">
+            <span>✦</span>
+            닉네임은 게시글에 표시돼요. 다른 사람에게 로그인 토큰은 공개되지 않아요.
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>ISHIGAKI TRAVEL JOURNAL</span>
+      <span>MADE WITH ♡ FOR OUR TRIP</span>
+    </footer>
+  </div>
+
+  <nav class="bottom-nav" aria-label="주요 메뉴">
+    <button class="nav-item active" type="button" data-page="home" aria-current="page">
+      <span class="nav-icon">⌂</span><span>홈</span>
+    </button>
+    <button class="nav-item" type="button" data-page="board">
+      <span class="nav-icon">▤</span><span>게시판</span>
+    </button>
+    <button class="nav-item" type="button" data-page="profile">
+      <span class="nav-icon">○</span><span>내 정보</span>
+    </button>
+  </nav>
+
+  <dialog id="invite-dialog" class="invite-dialog">
+    <div class="dialog-inner">
+      <span class="dialog-flower">✳</span>
+      <p class="eyebrow">PRIVATE TRAVEL JOURNAL</p>
+      <h2>우리 여행에<br />참여해 주세요.</h2>
+      <p class="dialog-description">
+        참가 코드를 입력하면 여행 게시판을 이용할 수 있어요.
+      </p>
+      <form id="invite-form">
+        <label for="invite-code">여행 참가 코드</label>
+        <input id="invite-code" type="password" maxlength="200"
+          autocomplete="off" placeholder="참가 코드 입력" required />
+        <button id="invite-submit" class="primary-button full-button" type="submit">
+          참가 인증하기 ↗
+        </button>
+        <p id="invite-message" class="message" role="status" aria-live="polite"></p>
+      </form>
+    </div>
+  </dialog>
+
+  <audio id="bgm" src="./files/ishigaki-bgm.mp3" loop preload="none"></audio>
+</body>
+</html>
