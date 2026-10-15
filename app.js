@@ -178,8 +178,25 @@ $("#invite-form").addEventListener("submit", async (event) => {
 
     if (error) {
       console.error("참가 인증 요청 실패:", error);
-      throw new Error("인증 요청에 실패했어요. 로그인과 함수 설정을 확인해 주세요.");
-    }
+    
+      let serverMessage = "";
+    
+      try {
+        const response = error.context;
+    
+        if (response && typeof response.json === "function") {
+          const details = await response.json();
+          serverMessage = details?.error || "";
+        }
+      } catch (readError) {
+        console.error("서버 오류 내용 확인 실패:", readError);
+  }
+
+  throw new Error(
+    serverMessage ||
+    "인증 요청에 실패했어요. 브라우저 개발자 도구에서 자세한 오류를 확인해 주세요."
+  );
+}
 
     if (!data?.success) {
       throw new Error(data?.error || "참가 인증에 실패했어요.");
