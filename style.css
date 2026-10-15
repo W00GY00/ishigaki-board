@@ -655,3 +655,129 @@ textarea::placeholder, input::placeholder { color: #a1b1af; }
     align-items: flex-start;
   }
 }
+
+
+/* 사진 원본 보기 화면 */
+.photo-lightbox {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.94);
+  align-items: center;
+  justify-content: center;
+  padding: 24px 56px;
+  box-sizing: border-box;
+}
+
+.photo-lightbox.is-open {
+  display: flex;
+}
+
+.lightbox-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+#lightbox-image {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100% - 36px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: 2px;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.lightbox-close,
+.lightbox-nav {
+  position: absolute;
+  z-index: 2;
+  border: 0;
+  color: white;
+  background: rgba(255, 255, 255, 0.14);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.lightbox-close {
+  top: 16px;
+  right: 20px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 32px;
+}
+
+.lightbox-nav {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 60px;
+  border-radius: 10px;
+  font-size: 42px;
+}
+
+.lightbox-prev {
+  left: 10px;
+}
+
+.lightbox-next {
+  right: 10px;
+}
+
+.lightbox-counter {
+  min-height: 28px;
+  padding-top: 8px;
+  color: white;
+  font-size: 14px;
+  text-align: center;
+}
+
+.lightbox-close:hover,
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+@media (max-width: 600px) {
+  .photo-lightbox {
+    padding: 56px 8px 24px;
+  }
+
+  .lightbox-nav {
+    width: 36px;
+    height: 48px;
+    font-size: 34px;
+    background: rgba(0, 0, 0, 0.35);
+  }
+
+  .lightbox-prev {
+    left: 4px;
+  }
+
+  .lightbox-next {
+    right: 4px;
+  }
+
+  .lightbox-close {
+    top: 8px;
+    right: 8px;
+  }
+
+  #lightbox-image {
+    max-width: 100%;
+    max-height: calc(100% - 36px);
+  }
+}
+
