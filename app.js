@@ -841,28 +841,35 @@ $("#music-toggle").addEventListener("click", async () => {
   }
 
   // 게시글 사진은 나중에 로드되어도 클릭할 수 있도록 이벤트 위임 사용
-  document.addEventListener("click", (event) => {
-    const clickedImage = event.target.closest(
-      ".post-photo-grid img, .photo-grid img"
-    );
+  
+document.addEventListener("click", (event) => {
+  const clickedImage = event.target.closest(
+    ".post-photo-grid img, .photo-grid img"
+  );
 
-    if (!clickedImage) return;
+  if (!clickedImage) return;
 
-    const postCard = clickedImage.closest(".post-card");
+  const postCard = clickedImage.closest(
+    ".post-card, .home-post-card"
+  );
 
-    if (!postCard) return;
+  const photoGrid = clickedImage.closest(
+    ".post-photo-grid, .photo-grid"
+  );
 
-    const images = Array.from(
-      postCard.querySelectorAll(".post-photo-grid img, .photo-grid img")
-    ).filter((img) => img.src);
+  const scope = postCard || photoGrid;
+  if (!scope) return;
 
-    const index = images.indexOf(clickedImage);
+  const images = Array.from(scope.querySelectorAll("img"))
+    .filter((img) => img.src);
 
-    if (index !== -1) {
-      event.preventDefault();
-      openPhoto(images, index);
-    }
-  });
+  const index = images.indexOf(clickedImage);
+  if (index < 0) return;
+
+  event.preventDefault();
+  openPhoto(images, index);
+});
+
 
   closeButton.addEventListener("click", closePhoto);
   prevButton.addEventListener("click", () => movePhoto(-1));
