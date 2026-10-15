@@ -58,31 +58,17 @@
             <span class="muted">OCT 16 — 19</span>
           </div>
 
-          <div class="info-grid">
-            <article class="info-card">
-              <span class="card-icon">☼</span>
-              <p class="card-kicker">DAY 01 · OCT 16</p>
-              <h3>여행의 시작</h3>
-              <p>이시가키에 도착해<br />섬의 첫 풍경 만나기</p>
-            </article>
-            <article class="info-card">
-              <span class="card-icon">≈</span>
-              <p class="card-kicker">DAY 02 · OCT 17</p>
-              <h3>바다와 섬</h3>
-              <p>푸른 바다와<br />여유로운 섬 여행</p>
-            </article>
-            <article class="info-card">
-              <span class="card-icon">✳</span>
-              <p class="card-kicker">DAY 03 · OCT 18</p>
-              <h3>우리의 기록</h3>
-              <p>사진과 이야기로<br />하루를 남기기</p>
-            </article>
-            <article class="info-card">
-              <span class="card-icon">⌁</span>
-              <p class="card-kicker">DAY 04 · OCT 19</p>
-              <h3>다음 여행을</h3>
-              <p>아쉬움을 담아<br />여행 마무리하기</p>
-            </article>
+          <div class="home-posts-panel">
+            <div class="home-posts-heading">
+              <h3>우리의 여행 기록</h3>
+              <button class="secondary-button" type="button" data-go="board">
+                전체 기록 보기 ↗
+              </button>
+            </div>
+            <p id="home-post-count" class="muted">기록을 불러오는 중...</p>
+            <div id="home-posts-list" class="home-posts-list">
+              <div class="empty-state">여행 기록을 불러오고 있어요...</div>
+            </div>
           </div>
         </section>
 
@@ -109,13 +95,41 @@
           </div>
 
           <form id="post-form" class="post-form">
-            <label for="post-content">새로운 여행 기록</label>
-            <textarea id="post-content" maxlength="3000" rows="4"
+            <label for="post-title">기록 제목</label>
+            <input
+              id="post-title"
+              type="text"
+              maxlength="100"
+              placeholder="예: 에메랄드빛 바다를 만난 날"
+              required
+            />
+          
+            <label for="post-content">여행 이야기</label>
+            <textarea
+              id="post-content"
+              maxlength="3000"
+              rows="4"
               placeholder="오늘의 여행 이야기나 공유하고 싶은 정보를 적어 주세요."
-              required></textarea>
+              required
+            ></textarea>
+          
+            <label for="post-photos">사진 첨부</label>
+            <input
+              id="post-photos"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              multiple
+            />
+            <p class="muted photo-help">
+              사진은 최대 5장, 한 장당 8MB까지 첨부할 수 있어요.
+            </p>
+            <div id="photo-preview" class="photo-grid"></div>
+          
             <div class="form-footer">
-              <span class="muted">최대 3,000자</span>
-              <button class="primary-button" type="submit">게시글 등록 ↗</button>
+              <span class="muted">본문 최대 3,000자</span>
+              <button class="primary-button" type="submit">
+                게시글 등록 ↗
+              </button>
             </div>
           </form>
 
