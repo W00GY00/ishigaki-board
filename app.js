@@ -774,4 +774,133 @@ $("#music-toggle").addEventListener("click", async () => {
   }
 });
 
+
+/* 게시글 사진 원본 보기 및 갤러리 */
+(() => {
+  const lightbox = document.getElementById("photo-lightbox");
+  const lightboxImage = document.getElementById("lightbox-image");
+  const counter = document.getElementById("lightbox-counter");
+  const closeButton = document.getElementById("lightbox-close");
+  const prevButton = document.getElementById("lightbox-prev");
+  const nextButton = document.getElementById("lightbox-next");
+
+  if (
+    !lightbox ||
+    !lightboxImage ||
+    !counter ||
+    !closeButton ||
+    !prevButton ||
+    !nextButton
+  ) {
+    return;
+  }
+
+  let gallery = [];
+  let currentIndex = 0;
+  let touchStartX = 0;
+
+  function renderPhoto() {
+    if (!gallery.length) return;
+
+    lightboxImage.src = gallery[currentIndex].src;
+    lightboxImage.alt = gallery[currentIndex].alt || "원본 사진";
+    counter.textContent = `${currentIndex + 1} / ${gallery.length}`;
+
+    const multiple = gallery.length > 1;
+    prevButton.hidden = !multiple;
+    nextButton.hidden = !multiple;
+    counter.hidden = !multiple;
+  }
+
+  function openPhoto(images, index) {
+    gallery = images;
+    currentIndex = index;
+
+    renderPhoto();
+    lightbox.classList.add("is-open");
+    lightbox.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
+    closeButton.focus();
+  }
+
+  function closePhoto() {
+    lightbox.classList.remove("is-open");
+    lightbox.setAttribute("aria-hidden", "true");
+    lightboxImage.removeAttribute("src");
+    document.body.style.overflow = "";
+    gallery = [];
+  }
+
+  function movePhoto(direction) {
+    if (gallery.length < 2) return;
+
+    currentIndex =
+      (currentIndex + direction + gallery.length) % gallery.length;
+
+    renderPhoto();
+  }
+
+  // 게시글 사진은 나중에 로드되어도 클릭할 수 있도록 이벤트 위임 사용
+  document.addEventListener("click", (event) => {
+    const clickedImage = event.target.closest(
+      ".post-photo-grid img, .photo-grid img"
+    );
+
+    if (!clickedImage) return;
+
+    const postCard = clickedImage.closest(".post-card");
+
+    if (!postCard) return;
+
+    const images = Array.from(
+      postCard.querySelectorAll(".post-photo-grid img, .photo-grid img")
+    ).filter((img) => img.src);
+
+    const index = images.indexOf(clickedImage);
+
+    if (index !== -1) {
+      event.preventDefault();
+      openPhoto(images, index);
+    }
+  });
+
+  closeButton.addEventListener("click", closePhoto);
+  prevButton.addEventListener("click", () => movePhoto(-1));
+  nextButton.addEventListener("click", () => movePhoto(1));
+
+  lightbox.addEventListener("click", (event) => {
+    if (event.target === lightbox) closePhoto();
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (!lightbox.classList.contains("is-open")) return;
+
+    if (event.key === "Escape") closePhoto();
+    if (event.key === "ArrowLeft") movePhoto(-1);
+    if (event.key === "ArrowRight") movePhoto(1);
+  });
+
+  lightbox.addEventListener(
+    "touchstart",
+    (event) => {
+      touchStartX = event.changedTouches[0].clientX;
+    },
+    { passive: true }
+  );
+
+  lightbox.addEventListener(
+    "touchend",
+    (event) => {
+      const touchEndX = event.changedTouches[0].clientX;
+      const difference = touchEndX - touchStartX;
+
+      if (Math.abs(difference) > 50) {
+        movePhoto(difference < 0 ? 1 : -1);
+      }
+    },
+    { passive: true }
+  );
+})();
+
+
 initializeApp();
