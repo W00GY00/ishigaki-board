@@ -1,12 +1,10 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// Supabase 대시보드의 Project URL과 Publishable key(또는 anon public key)
 const SUPABASE_URL = "https://ypfrvhvzepfbltyealge.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_7yx2B9ndSvH_jjMxc7U5iQ_ckuY2bLX";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 const $ = (selector) => document.querySelector(selector);
 
 const pages = {
@@ -21,11 +19,14 @@ let isMember = false;
 let isBusy = false;
 
 function setMessage(element, message, isError = false) {
+  if (!element) return;
   element.textContent = message;
   element.classList.toggle("error", isError);
 }
 
 function setBusy(button, busy, busyText = "처리 중...") {
+  if (!button) return;
+
   if (!button.dataset.originalText) {
     button.dataset.originalText = button.textContent;
   }
@@ -40,7 +41,9 @@ function showPage(pageName) {
   if (!pages[pageName]) return;
 
   if (pageName !== "home" && !isMember) {
-    $("#invite-dialog").showModal();
+    if (!$("#invite-dialog").open) {
+      $("#invite-dialog").showModal();
+    }
     return;
   }
 
@@ -63,24 +66,12 @@ function showPage(pageName) {
 
   if (pageName === "board") loadPosts();
   if (pageName === "profile") loadProfile();
+
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// Supabase 연결 상태와 익명 로그인 확인
+// 로그인 및 참가 인증 상태 확인
 async function initializeApp() {
-  if (
-    SUPABASE_URL === "YOUR_SUPABASE_URL" ||
-    SUPABASE_ANON_KEY === "YOUR_SUPABASE_ANON_KEY"
-  ) {
-    setMessage(
-      $("#invite-message"),
-      "app.js에 Supabase 프로젝트 URL과 공개 키를 먼저 입력해 주세요.",
-      true
-    );
-    $("#invite-dialog").showModal();
-    return;
-  }
-
   try {
     let { data, error } = await supabase.auth.getSession();
 
@@ -113,7 +104,7 @@ async function initializeApp() {
   }
 }
 
-// 서버에서 참가 인증을 완료한 사용자만 멤버로 인정
+// 참가 인증 기록 확인
 async function checkMembership() {
   const { data, error } = await supabase
     .from("trip_members")
@@ -125,7 +116,7 @@ async function checkMembership() {
     console.error("참가자 확인 오류:", error);
     setMessage(
       $("#invite-message"),
-      "참가 여부를 확인할 수 없어요. 데이터베이스 정책을 확인해 주세요.",
+      "참가 여부를 확인할 수 없어요. trip_members 정책을 확인해 주세요.",
       true
     );
 
@@ -138,8 +129,9 @@ async function checkMembership() {
   isMember = Boolean(data);
 
   if (isMember) {
-    $("#profile-status").textContent = "여행 참가 인증 완료";
-    $("#invite-message").textContent = "";
+    setMessage($("#profile-status"), "여행 참가 인증 완료");
+    setMessage($("#invite-message"), "");
+
     await loadProfile();
     await loadPosts();
 
@@ -147,7 +139,7 @@ async function checkMembership() {
       $("#invite-dialog").close();
     }
   } else {
-    $("#profile-status").textContent = "참가 인증이 필요해요.";
+    setMessage($("#profile-status"), "참가 인증이 필요해요.");
 
     if (!$("#invite-dialog").open) {
       $("#invite-dialog").showModal();
@@ -158,13 +150,12 @@ async function checkMembership() {
 // 여행 참가 코드 검증
 $("#invite-form").addEventListener("submit", async (event) => {
   event.preventDefault();
-
   if (isBusy) return;
 
-  const code = $("#invite-code").value;
+  const code = $("#invite-code").value.trim();
   const button = $("#invite-submit");
 
-  if (!code.trim()) {
+  if (!code) {
     setMessage($("#invite-message"), "참가 코드를 입력해 주세요.", true);
     return;
   }
@@ -180,12 +171,9 @@ $("#invite-form").addEventListener("submit", async (event) => {
       currentUser = result.data.user;
     }
 
-    // Supabase SDK가 현재 로그인 세션을 이용해 인증 헤더를 처리
     const { data, error } = await supabase.functions.invoke(
       "verify-trip-code",
-      {
-        body: { code },
-      }
+      { body: { code } }
     );
 
     if (error) {
@@ -198,7 +186,7 @@ $("#invite-form").addEventListener("submit", async (event) => {
     }
 
     $("#invite-code").value = "";
-    setMessage($("#invite-message"), "인증 성공! 여행 공간에 입장합니다.");
+    setMessage($("#invite-message"), "인증 성공! 참가 정보를 확인하고 있어요.");
 
     await checkMembership();
 
@@ -218,14 +206,14 @@ $("#invite-form").addEventListener("submit", async (event) => {
   }
 });
 
-// 닉네임 조회
+// 닉네임 조회: profiles의 기본 키는 id
 async function loadProfile() {
   if (!currentUser || !isMember) return;
 
   const { data, error } = await supabase
     .from("profiles")
-    .select("nickname")
-    .eq("user_id", currentUser.id)
+    .select("id, nickname")
+    .eq("id", currentUser.id)
     .maybeSingle();
 
   if (error) {
@@ -259,11 +247,10 @@ $("#profile-form").addEventListener("submit", async (event) => {
       .from("profiles")
       .upsert(
         {
-          user_id: currentUser.id,
+          id: currentUser.id,
           nickname,
-          updated_at: new Date().toISOString(),
         },
-        { onConflict: "user_id" }
+        { onConflict: "id" }
       );
 
     if (error) throw error;
@@ -275,7 +262,7 @@ $("#profile-form").addEventListener("submit", async (event) => {
     console.error("닉네임 저장 오류:", error);
     setMessage(
       $("#profile-status"),
-      "저장에 실패했어요. profiles 테이블과 보안 정책을 확인해 주세요.",
+      "저장에 실패했어요. profiles 테이블과 RLS 정책을 확인해 주세요.",
       true
     );
   } finally {
@@ -283,18 +270,20 @@ $("#profile-form").addEventListener("submit", async (event) => {
   }
 });
 
-// 게시글 조회
+// 게시글 조회: posts의 실제 열 이름 사용
 async function loadPosts() {
   if (!isMember) return;
 
   const list = $("#posts-list");
+  if (!list) return;
+
   $("#post-count").textContent = "불러오는 중...";
   list.replaceChildren();
 
   try {
     const { data, error } = await supabase
       .from("posts")
-      .select("id, user_id, nickname, content, created_at")
+      .select("id, author_id, title, body, created_at")
       .order("created_at", { ascending: false })
       .limit(100);
 
@@ -319,7 +308,10 @@ async function loadPosts() {
 
       const author = document.createElement("span");
       author.className = "post-author";
-      author.textContent = post.nickname || "여행자";
+      author.textContent =
+        post.author_id === currentUser?.id
+          ? currentNickname
+          : "여행자";
 
       const date = document.createElement("time");
       date.dateTime = post.created_at;
@@ -331,14 +323,18 @@ async function loadPosts() {
         minute: "2-digit",
       });
 
-      const content = document.createElement("p");
-      content.className = "post-content";
-      content.textContent = post.content;
+      const title = document.createElement("h3");
+      title.className = "post-title";
+      title.textContent = post.title || "여행 기록";
+
+      const body = document.createElement("p");
+      body.className = "post-content";
+      body.textContent = post.body || "";
 
       meta.append(author, date);
-      card.append(meta, content);
+      card.append(meta, title, body);
 
-      if (post.user_id === currentUser?.id) {
+      if (post.author_id === currentUser?.id) {
         const removeButton = document.createElement("button");
         removeButton.type = "button";
         removeButton.className = "secondary-button";
@@ -368,10 +364,18 @@ $("#post-form").addEventListener("submit", async (event) => {
 
   if (!currentUser || !isMember) return;
 
-  const content = $("#post-content").value.trim();
+  const body = $("#post-content").value.trim();
+  const titleInput = $("#post-title");
+  const enteredTitle = titleInput?.value.trim() || "";
+
+  const title =
+    enteredTitle ||
+    body.split(/\r?\n/)[0].slice(0, 60) ||
+    "여행 기록";
+
   const button = event.currentTarget.querySelector("button[type='submit']");
 
-  if (!content) {
+  if (!body) {
     setMessage($("#board-message"), "게시글 내용을 입력해 주세요.", true);
     return;
   }
@@ -381,21 +385,23 @@ $("#post-form").addEventListener("submit", async (event) => {
 
   try {
     const { error } = await supabase.from("posts").insert({
-      user_id: currentUser.id,
-      nickname: currentNickname,
-      content,
+      author_id: currentUser.id,
+      title,
+      body,
     });
 
     if (error) throw error;
 
     $("#post-content").value = "";
+    if (titleInput) titleInput.value = "";
+
     setMessage($("#board-message"), "게시글을 등록했어요.");
     await loadPosts();
   } catch (error) {
     console.error("게시글 등록 오류:", error);
     setMessage(
       $("#board-message"),
-      "게시글 등록에 실패했어요. 테이블 열과 RLS 정책을 확인해 주세요.",
+      "게시글 등록에 실패했어요. posts 테이블과 RLS 정책을 확인해 주세요.",
       true
     );
   } finally {
@@ -413,7 +419,7 @@ async function deletePost(postId) {
       .from("posts")
       .delete()
       .eq("id", postId)
-      .eq("user_id", currentUser.id);
+      .eq("author_id", currentUser.id);
 
     if (error) throw error;
 
@@ -436,7 +442,7 @@ document.querySelectorAll("[data-go]").forEach((button) => {
 
 $("#refresh-posts").addEventListener("click", loadPosts);
 
-// 배경음악: 브라우저 정책에 따라 사용자 클릭 후 재생
+// 배경음악
 $("#music-toggle").addEventListener("click", async () => {
   const audio = $("#bgm");
   const button = $("#music-toggle");
@@ -449,7 +455,7 @@ $("#music-toggle").addEventListener("click", async () => {
     } catch (error) {
       console.error("음악 재생 실패:", error);
       $("#music-label").textContent = "FILE CHECK";
-      alert("음악 파일이 있는지 확인해 주세요: files/ishigaki-bgm.mp3");
+      alert("음악 파일을 확인해 주세요: files/ishigaki-bgm.mp3");
     }
   } else {
     audio.pause();
