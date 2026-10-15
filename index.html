@@ -160,6 +160,19 @@
             <button class="primary-button full-button" type="submit">
               닉네임 저장
             </button>
+            <button
+              id="logout-button"
+              class="secondary-button full-button"
+              type="button"
+            >
+              로그아웃
+            </button>
+            <p
+              id="logout-message"
+              class="message"
+              role="status"
+              aria-live="polite"
+            ></p>
           </form>
 
           <div class="profile-note">
@@ -205,6 +218,46 @@
         </button>
         <p id="invite-message" class="message" role="status" aria-live="polite"></p>
       </form>
+      
+      <hr class="login-divider" />
+      <section class="admin-login-section">
+        <p class="eyebrow">ADMINISTRATOR</p>
+        <h3>관리자 로그인</h3>
+        <p class="muted">
+          관리자 계정으로 로그인하면 게시글을 관리할 수 있어요.
+        </p>
+        <form id="admin-login-form">
+          <label for="admin-email">관리자 이메일</label>
+          <input
+            id="admin-email"
+            type="email"
+            autocomplete="username"
+            placeholder="관리자 이메일"
+            required
+          />
+          <label for="admin-password">비밀번호</label>
+          <input
+            id="admin-password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="관리자 비밀번호"
+            required
+          />
+          <button
+            id="admin-login-submit"
+            class="primary-button full-button"
+            type="submit"
+          >
+            관리자 로그인
+          </button>
+          <p
+            id="admin-login-message"
+            class="message"
+            role="status"
+            aria-live="polite"
+          ></p>
+        </form>
+      </section>
     </div>
   </dialog>
 
