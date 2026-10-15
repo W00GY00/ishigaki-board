@@ -149,6 +149,8 @@ async function checkAdmin() {
 }
 
 // 참가 인증 기록 확인
+
+ // 참가 인증 기록 확인
 async function checkMembership() {
   const { data, error } = await supabase
     .from("trip_members")
@@ -172,26 +174,25 @@ async function checkMembership() {
 
   isMember = Boolean(data);
 
-  
   if (isMember) {
     setMessage($("#profile-status"), "여행 참가 인증 완료");
     setMessage($("#invite-message"), "");
-  
+
     await checkAdmin();
     await loadProfile();
     await loadPosts();
-  
+
     if ($("#invite-dialog").open) {
       $("#invite-dialog").close();
     }
   } else {
     setMessage($("#profile-status"), "참가 인증이 필요해요.");
-  
+
     if (!$("#invite-dialog").open) {
       $("#invite-dialog").showModal();
+    }
   }
 }
-
 
 // 여행 참가 코드 검증
 $("#invite-form").addEventListener("submit", async (event) => {
