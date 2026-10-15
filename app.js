@@ -847,16 +847,29 @@ $("#post-form").addEventListener("submit", async (event) => {
 });
 
 // 본인이 작성한 게시글과 사진 삭제
+
+/* 게시글 및 첨부 사진 삭제 */
 async function deletePost(postId) {
-  if (!currentUser || !isMember) return;
-  if (!window.confirm("이 게시글과 첨부 사진을 삭제할까요?")) return;
+  if (!currentUser || (!isMember && !isAdmin)) return;
+
+  if (!window.confirm("이 게시글과 첨부 사진을 삭제할까요?")) {
+    return;
+  }
 
   try {
-    const { data: photoRows, error: photoQueryError } = await supabase
+    // 관리자는 해당 게시글의 모든 사진을 조회하고,
+    // 일반 참가자는 본인이 등록한 사진만 조회
+    let photoQuery = supabase
       .from("post_photos")
       .select("storage_path")
-      .eq("post_id", postId)
-      .eq("author_id", currentUser.id);
+      .eq("post_id", postId);
+
+    if (!isAdmin) {
+      photoQuery = photoQuery.eq("author_id", currentUser.id);
+    }
+
+    const { data: photoRows, error: photoQueryError } =
+      await photoQuery;
 
     if (photoQueryError) throw photoQueryError;
 
@@ -864,6 +877,7 @@ async function deletePost(postId) {
       .map((photo) => photo.storage_path)
       .filter(Boolean);
 
+    // 비공개 Storage에서 실제 사진 파일 삭제
     if (paths.length > 0) {
       const { error: storageError } = await supabase.storage
         .from("trip-photos")
@@ -872,29 +886,48 @@ async function deletePost(postId) {
       if (storageError) throw storageError;
     }
 
-    const { error: metadataError } = await supabase
+    // 사진 메타데이터 삭제
+    let metadataQuery = supabase
       .from("post_photos")
       .delete()
-      .eq("post_id", postId)
-      .eq("author_id", currentUser.id);
+      .eq("post_id", postId);
+
+    if (!isAdmin) {
+      metadataQuery = metadataQuery.eq("author_id", currentUser.id);
+    }
+
+    const { error: metadataError } = await metadataQuery;
 
     if (metadataError) throw metadataError;
 
-    const { error: postError } = await supabase
+    // 게시글 삭제
+    let postQuery = supabase
       .from("posts")
       .delete()
-      .eq("id", postId)
-      .eq("author_id", currentUser.id);
+      .eq("id", postId);
+
+    if (!isAdmin) {
+      postQuery = postQuery.eq("author_id", currentUser.id);
+    }
+
+    const { error: postError } = await postQuery;
 
     if (postError) throw postError;
 
-    setMessage($("#board-message"), "게시글과 첨부 사진을 삭제했어요.");
+    setMessage(
+      $("#board-message"),
+      isAdmin
+        ? "게시글과 첨부 사진을 삭제했어요."
+        : "내 게시글과 첨부 사진을 삭제했어요."
+    );
+
     await loadPosts();
   } catch (error) {
     console.error("게시글 삭제 오류:", error);
+
     setMessage(
       $("#board-message"),
-      "삭제에 실패했어요. Storage와 게시글 삭제 정책을 확인해 주세요.",
+      "삭제에 실패했어요. 관리자 권한과 Storage/RLS 정책을 확인해 주세요.",
       true
     );
   }
