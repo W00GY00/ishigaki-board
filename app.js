@@ -25,6 +25,7 @@ let currentUser = null;
 let currentNickname = "여행자";
 let isMember = false;
 let isBusy = false;
+let isAdmin = false;
 
 function setMessage(element, message, isError = false) {
   if (!element) return;
@@ -126,6 +127,27 @@ async function initializeApp() {
   }
 }
 
+/* 관리자 계정 확인 */
+async function checkAdmin() {
+  isAdmin = false;
+
+  if (!currentUser?.id) return;
+
+  const { data, error } = await supabase
+    .from("trip_admins")
+    .select("user_id")
+    .eq("user_id", currentUser.id)
+    .maybeSingle();
+
+  if (error) {
+    console.error("관리자 확인 오류:", error);
+    return;
+  }
+
+  isAdmin = Boolean(data);
+  console.log("관리자 여부:", isAdmin);
+}
+
 // 참가 인증 기록 확인
 async function checkMembership() {
   const { data, error } = await supabase
@@ -150,24 +172,26 @@ async function checkMembership() {
 
   isMember = Boolean(data);
 
+  
   if (isMember) {
     setMessage($("#profile-status"), "여행 참가 인증 완료");
     setMessage($("#invite-message"), "");
-
+  
+    await checkAdmin();
     await loadProfile();
     await loadPosts();
-
+  
     if ($("#invite-dialog").open) {
       $("#invite-dialog").close();
     }
   } else {
     setMessage($("#profile-status"), "참가 인증이 필요해요.");
-
+  
     if (!$("#invite-dialog").open) {
       $("#invite-dialog").showModal();
-    }
   }
 }
+
 
 // 여행 참가 코드 검증
 $("#invite-form").addEventListener("submit", async (event) => {
@@ -482,7 +506,7 @@ function createPostCard(post, photos, nicknames, isHome = false) {
 
   if (isHome) {
     card.addEventListener("click", () => showPage("board"));
-  } else if (post.author_id === currentUser?.id) {
+  } else if (post.author_id === currentUser?.id || isAdmin) {
     const removeButton = makeElement(
       "button",
       "secondary-button",
